@@ -11,7 +11,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->registerRepositories();
+        $this->registerServices();
     }
 
     /**
@@ -20,5 +21,21 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         //
+    }
+
+    private function registerRepositories()
+    {
+        $this->app->bind(
+            \App\Contracts\Repositories\CustomerRepositoryInterface::class,
+            \App\Repositories\CustomerRepository::class
+        );
+    }
+
+    private function registerServices()
+    {
+        $this->app->bind(
+            \App\Contracts\Services\CustomerServiceInterface::class,
+            \App\Services\CustomerService::class
+        );
     }
 }
