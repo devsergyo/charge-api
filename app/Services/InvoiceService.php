@@ -8,6 +8,7 @@ use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Log;
 use App\Models\Invoice;
 use Exception;
+use Illuminate\Support\Facades\Cache;
 
 class InvoiceService implements InvoiceServiceInterface
 {
@@ -21,13 +22,32 @@ class InvoiceService implements InvoiceServiceInterface
     public function findAllByCustomerId(?int $customerId, int $perPage = 15): LengthAwarePaginator
     {
         try {
+            $cacheKey = 'invoices_' . $customerId . '_' . $perPage;
+
+            if (Cache::has($cacheKey)) {
+
+                $cachedInvoices = Cache::get($cacheKey);
+                Log::debug('Faturas listadas do cache com sucesso', [
+                    'method' => __METHOD__,
+                    'customer_id' => $customerId,
+                    'per_page' => $perPage,
+                    'total_found' => $cachedInvoices->total()
+                ]);
+                return $cachedInvoices;
+            }
+
             $invoices = $this->invoiceRepository->findAllByCustomerId($customerId, $perPage);
             
-            Log::debug('Faturas listadas com sucesso', [
+            // Salvar no cache por 30 minutos
+            Cache::put($cacheKey, $invoices, now()->addMinutes(30));
+            
+            Log::debug('Faturas listadas do banco de dados e salvas no cache com sucesso', [
                 'method' => __METHOD__,
                 'customer_id' => $customerId,
                 'per_page' => $perPage,
-                'total_found' => $invoices->total()
+                'total_found' => $invoices->total(),
+                'cache_key' => $cacheKey,
+                'cache_ttl' => '30 minutes'
             ]);
             
             return $invoices;

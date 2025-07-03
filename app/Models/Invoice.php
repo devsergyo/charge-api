@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Events\Invoice\InvoiceCreated;
 
 class Invoice extends Model
 {
@@ -21,6 +22,13 @@ class Invoice extends Model
     protected $casts = [
         'amount' => 'decimal:2',
         'due_date' => 'date',
+    ];
+
+    /**
+     * Eventos do modelo
+     */
+    protected $dispatchesEvents = [
+        'created' => InvoiceCreated::class,
     ];
 
     public function customer(): BelongsTo
