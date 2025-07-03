@@ -15,5 +15,8 @@ class DatabaseSeeder extends Seeder
     {        
         // Seeder de clientes
         $this->call(CustomerSeeder::class);
+        
+        // Seeder de faturas (usando os clientes já criados)
+        $this->call(InvoiceSeeder::class);
     }
 }

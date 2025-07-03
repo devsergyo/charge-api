@@ -24,7 +24,6 @@ class StoreController extends Controller
     {
         $customer = $this->customerService->create($request->validated());
 
-        return (new CustomerResource($customer))
-            ->response();
+        return (new CustomerResource($customer))->response();
     }
 } 

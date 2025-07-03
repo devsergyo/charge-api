@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\Scopes\Searchable;
 
 class Customer extends Model
@@ -87,5 +88,13 @@ class Customer extends Model
         return Attribute::make(
             get: fn() => "{$this->first_name} {$this->last_name}",
         );
+    }
+
+    /**
+     * Relacionamento com faturas do cliente
+     */
+    public function invoices(): HasMany
+    {
+        return $this->hasMany(Invoice::class, 'customer_id');
     }
 }

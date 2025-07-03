@@ -29,6 +29,10 @@ class AppServiceProvider extends ServiceProvider
             \App\Contracts\Repositories\CustomerRepositoryInterface::class,
             \App\Repositories\CustomerRepository::class
         );
+        $this->app->bind(
+            \App\Contracts\Repositories\InvoiceRepositoryInterface::class,
+            \App\Repositories\Eloquent\InvoiceRepository::class
+        );
     }
 
     private function registerServices()
@@ -36,6 +40,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(
             \App\Contracts\Services\CustomerServiceInterface::class,
             \App\Services\CustomerService::class
+        );  
+        $this->app->bind(
+            \App\Contracts\Services\InvoiceServiceInterface::class,
+            \App\Services\InvoiceService::class
         );
     }
 }
