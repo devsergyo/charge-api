@@ -1,34 +1,40 @@
 FROM php:8.4-fpm-alpine
 
-# Instalar dependências do sistema
+ARG user=www-data
+ARG uid=33
+
 RUN apk add --no-cache \
     git \
     curl \
     postgresql-dev \
     oniguruma-dev \
     zip \
-    unzip
+    unzip \
+    shadow
 
-# Instalar extensões PHP necessárias para Laravel API
 RUN docker-php-ext-install \
     pdo \
     pdo_pgsql \
     mbstring \
-    bcmath \
-    opcache
+    bcmath
 
-# Instalar Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Definir diretório de trabalho
+RUN if [ "$user" != "www-data" ]; then \
+        addgroup -g $uid $user && \
+        adduser -D -u $uid -G $user -G www-data $user; \
+    fi
+
 WORKDIR /var/www/html
 
-# Copiar arquivos do projeto
-COPY . .
+COPY --chown=$user:www-data . .
 
+RUN mkdir -p storage/logs storage/framework/cache storage/framework/sessions storage/framework/views bootstrap/cache \
+    && chown -R $user:www-data storage bootstrap/cache \
+    && chmod -R 2775 storage bootstrap/cache
 
-# Expor porta 9000 para PHP-FPM
+USER $user
+
 EXPOSE 9000
 
-# Comando padrão
 CMD ["php-fpm"] 
