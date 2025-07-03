@@ -5,6 +5,8 @@ namespace App\Repositories\Eloquent;
 use App\Contracts\Repositories\InvoiceRepositoryInterface;
 use App\Models\Invoice;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+use App\Jobs\SendInvoiceNotificationJob;
 
 class InvoiceRepository implements InvoiceRepositoryInterface
 {
@@ -27,6 +29,17 @@ class InvoiceRepository implements InvoiceRepositoryInterface
      */
     public function create(array $data): Invoice
     {
-        return Invoice::create($data);
+        DB::beginTransaction();
+        try {
+            $invoice = Invoice::create($data);
+
+            SendInvoiceNotificationJob::dispatch($invoice);
+
+            DB::commit();
+            return $invoice;
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
     }
 }
